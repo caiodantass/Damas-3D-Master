@@ -236,12 +236,12 @@ python teste_regras.py
 
 ---
 
-##  Autor
+## Autor
 
-Desenvolvido por **Caio Dantas**.
-
-[![GitHub](https://img.shields.io/badge/GitHub-caiodantass-181717?style=flat-square&logo=github)](https://github.com/caiodantass)
-[![Email](https://img.shields.io/badge/Email-caiomunizdantas@gmail.com-D14836?style=flat-square&logo=gmail&logoColor=white)](mailto:caiomunizdantas@gmail.com)
+**Caio Dantas**  
+* Engenheiro de Software / Desenvolvedor de Firmware  
+* GitHub: [@caiodantass](https://github.com/caiodantass)  
+* LinkedIn: [linkedin.com/in/caiodantass](https://www.linkedin.com/in/caio-l%C3%ADvio/)
 
 ---
 
