@@ -1,6 +1,6 @@
 <div align="center">
 
-# ♟️ Damas 3D Master | Checkers 3D AI & Official Engine
+# Damas 3D Master | Checkers 3D AI & Official Engine
 
 <p align="center">
   <strong>Jogo de Damas com Engine Oficial de Regras Brasileiras (CBJD), Inteligência Artificial com Minimax e Poda Alfa-Beta, e Renderização 3D Fotorrealista no Navegador.</strong>
@@ -15,13 +15,13 @@
 
 <br/>
 
-[✨ Funcionalidades](#-funcionalidades) •
-[🧠 Inteligência Artificial](#-inteligência-artificial-ia) •
-[🏆 Regras Oficiais Modeladas](#-regras-oficiais-modeladas-cbjd) •
-[🚀 Como Executar](#-como-executar) •
-[🧪 Testes](#-testes-automatizados) •
-[🏛️ Arquitetura de Software](#-arquitetura-do-projeto) •
-[👤 Autor](#-autor)
+[Funcionalidades](#-funcionalidades) •
+[Inteligência Artificial](#-inteligência-artificial-ia) •
+[Regras Oficiais Modeladas](#-regras-oficiais-modeladas-cbjd) •
+[Como Executar](#-como-executar) •
+[Testes](#-testes-automatizados) •
+[Arquitetura de Software](#-arquitetura-do-projeto) •
+[Autor](#-autor)
 
 <br/>
 
@@ -29,13 +29,13 @@
 
 ---
 
-## 📌 Visão Geral do Projeto
+## Visão Geral do Projeto
 
 O **Damas 3D Master** é um projeto completo de engenharia de software que combina **desenvolvimento de algoritmos de jogos**, **computação gráfica 3D** e **inteligência artificial adversarial**.
 
 O projeto nasceu originalmente como um clássico jogo de terminal em Python e evoluiu para uma **aplicação Web 3D moderna e imersiva**, mantendo um motor matemático rigoroso que obedece 100% às regras oficiais das **Damas Brasileiras (64 casas)** estabelecidas pela Confederação Brasileira de Jogo de Damas (CBJD) e pela Fédération Mondiale du Jeu de Dames (FMJD).
 
-### 🎯 O que torna este projeto diferenciado:
+### O que torna este projeto diferenciado:
 - **Zero Frameworks Pesados:** Construído com JavaScript Vanilla, Three.js puro e Python nativo — leve, performático e sem dependências infladas de Node.js/npm.
 - **Engenharia de Regras Rigorosa:** Implementação estrita de regras complexas que a maioria dos jogos amadores ignora, como a **Lei da Maioria** (busca em profundidade por árvores de captura), **Dama Voadora**, **Captura para Trás** e **Promoção apenas ao Concluir Lance**.
 - **Algoritmos de IA:** Tomada de decisão por árvore de busca minimax com **Poda Alfa-Beta (Alpha-Beta Pruning)** e funções heurísticas de avaliação posicional.
@@ -44,15 +44,15 @@ O projeto nasceu originalmente como um clássico jogo de terminal em Python e ev
 
 ---
 
-## ✨ Funcionalidades
+## Funcionalidades
 
-### 🌐 Versão Web 3D (Navegador)
-- 🎮 **Modo Jogador vs Máquina (IA):**
+### Versão Web 3D (Navegador)
+-  **Modo Jogador vs Máquina (IA):**
   - **Iniciante (Fácil):** Movimentos semi-casuais, ideal para aprendizado.
   - **Estrategista (Médio):** Minimax com profundidade 3, focando em segurança e centro.
   - **Mestre (Difícil):** Minimax com Poda Alfa-Beta profundidade 4+, avaliando sacrifícios táticos e controle posicional.
-- 👥 **Modo Jogador vs Jogador (PvP Local):** Partida para 2 jogadores no mesmo dispositivo com alternância dinâmica de turnos.
-- 🎨 **Ambiente 3D Fotorrealista:**
+-  **Modo Jogador vs Jogador (PvP Local):** Partida para 2 jogadores no mesmo dispositivo com alternância dinâmica de turnos.
+-  **Ambiente 3D Fotorrealista:**
   - Tabuleiro em madeira nobre esculpida com textura procedural e frisos metálicos.
   - Peças chanfradas torneadas com **Coroa Real 3D Dourada** esculpida nas Damas.
   - **Animação em Parábola 3D:** a peça salta no ar por cima da peça capturada antes de aterrissar.
@@ -61,18 +61,18 @@ O projeto nasceu originalmente como um clássico jogo de terminal em Python e ev
   - `3D Livre`: Rotação orbital suave e zoom interativo com o mouse.
   - `Superior (2D)`: Visão tática vertical ortogonal.
   - `Pretas / Brancas`: Câmeras alinhadas à perspectiva de cada jogador.
-- ↩️ **Função Desfazer Lance (Undo):** Reversão profunda de estados com restauro completo de tabuleiro, contadores e histórico.
-- 📜 **Histórico de Lances:** Notação padrão de partidas em tempo real (ex.: `C3 → D4`, `E5 ✕ C7 ✕ A5`).
-- 🔊 **Efeitos Sonoros Nativos:** Deslize de madeira, impacto de captura, acorde de coroação e fanfarra de vitória.
-- 🎉 **Efeito Comemorativo:** Chuva de confetes de partículas 3D ao finalizar a partida.
+-  **Função Desfazer Lance (Undo):** Reversão profunda de estados com restauro completo de tabuleiro, contadores e histórico.
+-  **Histórico de Lances:** Notação padrão de partidas em tempo real (ex.: `C3 → D4`, `E5 ✕ C7 ✕ A5`).
+-  **Efeitos Sonoros Nativos:** Deslize de madeira, impacto de captura, acorde de coroação e fanfarra de vitória.
+-  **Efeito Comemorativo:** Chuva de confetes de partículas 3D ao finalizar a partida.
 
-### 💻 Versão Terminal Clássica (Python)
+###  Versão Terminal Clássica (Python)
 - Jogo executado diretamente pelo console com formatação rica em cores ANSI.
 - Sistema de **Memory Card** com serialização de dados (`savegame.pkl` via Pickle) para salvar e continuar partidas a qualquer momento.
 
 ---
 
-## 🏆 Regras Oficiais Modeladas (CBJD / FMJD)
+##  Regras Oficiais Modeladas (CBJD / FMJD)
 
 Muitas implementações de damas pecam por aplicar regras simplificadas de *Checkers* americano. Este projeto implementa as **Damas Brasileiras**:
 
@@ -89,7 +89,7 @@ Muitas implementações de damas pecam por aplicar regras simplificadas de *Chec
 
 ---
 
-## 🧠 Inteligência Artificial (IA)
+##  Inteligência Artificial (IA)
 
 A IA do jogo não utiliza decisões aleatórias cegas, mas sim técnicas clássicas de **Teoria dos Jogos**:
 
@@ -119,7 +119,7 @@ A IA do jogo não utiliza decisões aleatórias cegas, mas sim técnicas clássi
 
 ---
 
-## 🏛️ Arquitetura do Projeto
+##  Arquitetura do Projeto
 
 O código foi reestruturado seguindo o princípio da **Separação de Responsabilidades (SoC)**:
 
@@ -131,7 +131,7 @@ Projeto_Damas/
 ├── README.md                  # Documentação técnica do repositório
 ├── .gitignore                 # Filtro de arquivos de compilação e cache
 │
-├── web/                       # 🌐 APLICAÇÃO WEB 3D MASTER
+├── web/                       #  APLICAÇÃO WEB 3D MASTER
 │   ├── index.html             # Estrutura semântica e HUD em Glassmorphism
 │   ├── css/
 │   │   └── style.css          # Estilos visuais, responsividade e Dark Mode
@@ -146,7 +146,7 @@ Projeto_Damas/
 │       ├── OrbitControls.js   # Controle orbital de câmera
 │       └── canvas-confetti.min.js # Efeitos de partículas na vitória
 │
-├── main.py                    # 💻 LOOP PRINCIPAL DA VERSÃO TERMINAL
+├── main.py                    # LOOP PRINCIPAL DA VERSÃO TERMINAL
 ├── movimentacao.py            # Motor de regras em Python puro
 ├── tabuleiro.py               # Renderizador do tabuleiro em caracteres ANSI
 ├── constantes.py              # Definições globais de estado e peças
@@ -155,13 +155,13 @@ Projeto_Damas/
 
 ---
 
-## 🚀 Como Executar
+## Como Executar
 
 ### Pré-requisitos
 - **Python 3.8+** instalado no sistema.
 - Um navegador web moderno (Google Chrome, Edge, Firefox, Brave, Safari, etc.).
 
-### 1️⃣ Executando a Versão Web 3D (Recomendado)
+### 1️ Executando a Versão Web 3D (Recomendado)
 Clone o repositório e execute o inicializador automático:
 
 ```bash
@@ -180,7 +180,7 @@ python iniciar_jogo.py
 
 ---
 
-### 2️⃣ Executando a Versão Terminal Clássica
+### 2️ Executando a Versão Terminal Clássica
 Caso queira jogar a versão clássica no terminal:
 
 ```bash
@@ -195,7 +195,7 @@ Jogador 1 ('Alice'), escolha a movimentação da peça - (Linha Coluna): 4 0
 
 ---
 
-## 🧪 Testes Automatizados
+##  Testes Automatizados
 
 O motor de regras possui uma suíte dedicada com **13 testes automatizados** cobrindo todos os casos de borda e regras críticas:
 
@@ -225,7 +225,7 @@ python teste_regras.py
 
 ---
 
-## 🛠️ Tecnologias Utilizadas
+##  Tecnologias Utilizadas
 
 - **Linguagens:** Python 3, JavaScript (ES6+), HTML5, CSS3.
 - **Gráficos 3D & Shaders:** Three.js, WebGL, PBR Shading, OrbitControls.
@@ -236,7 +236,7 @@ python teste_regras.py
 
 ---
 
-## 👤 Autor
+##  Autor
 
 Desenvolvido por **Caio Dantas**.
 
@@ -246,5 +246,5 @@ Desenvolvido por **Caio Dantas**.
 ---
 
 <div align="center">
-  Se este projeto foi útil ou te inspirou, considere deixar uma ⭐️ no repositório!
+  Se este projeto foi útil ou te inspirou, considere deixar uma  no repositório!
 </div>
