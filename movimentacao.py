@@ -1,691 +1,475 @@
 from tabuleiro import *
 import constantes as const
 
+DIRECOES = [(-1, -1), (-1, 1), (1, -1), (1, 1)]
+
+def dentro_tabuleiro(l, c):
+    """Verifica se a linha e coluna estao dentro dos limites 8x8."""
+    return 0 <= l < 8 and 0 <= c < 8
+
+def casa_jogavel(l, c):
+    """Verifica se a posicao e uma casa escura jogavel."""
+    return dentro_tabuleiro(l, c) and (l + c) % 2 == 0
+
 def verifica_posicao(l, c):
-    """Verificação de posição dentro do limite do tabuleiro
-    
-    Args:
-        l (int): Linha da matriz
-        c (int): Coluna da matriz
-    
-    Returns:
-        bool: Retorna um bool representando o posicionamento dentro da matriz
-    """
-    try:
-        if (l>=0 and l<=7) and (c>=0 and c<=7):
-            return const.matriz[l][c]
-        else:
-            return False
-    except:
-        pass
+    """Verificacao de posicao dentro do limite do tabuleiro (para compatibilidade)."""
+    if dentro_tabuleiro(l, c):
+        return const.matriz[l][c]
+    return False
+
+def eh_preta(peca):
+    return peca in (const.pretas, const.dama_preta)
+
+def eh_branca(peca):
+    return peca in (const.brancas, const.dama_branca)
+
+def eh_dama(peca):
+    return peca in (const.dama_preta, const.dama_branca)
+
+def eh_adversario(peca1, peca2):
+    if peca2 == const.vazio or peca2 is False:
+        return False
+    if eh_preta(peca1):
+        return eh_branca(peca2)
+    if eh_branca(peca1):
+        return eh_preta(peca2)
+    return False
+
+def eh_amigo(peca1, peca2):
+    if peca2 == const.vazio or peca2 is False:
+        return False
+    if eh_preta(peca1):
+        return eh_preta(peca2)
+    if eh_branca(peca1):
+        return eh_branca(peca2)
+    return False
 
 def limites_diagonais(l, c):
-    """ Análisa os limites diagonais (posição máxima que se
-    pode chegar atrávez da diagonal a qual a peça está localizada)
-    
-    Args:
-        l (int): Linha da peça a ser analizada
-        c (int): Coluna da peça a ser analizada
-        
-    Returns:
-        list: Retorna uma lista com 4 listas, onde cada uma refere-se
-        a uma diagonal.
-    """
-    if l<=c and l+c<=7:
-        direita_descendo = ((- (c - l) + 7), 7)
-        direita_subindo = (0, (l + c))
-        esquerda_descendo = ((l + c), 0)
-        esquerda_subindo = (0, (c - l))
-    
-    if l>=c and l+c>=7:
-        direita_descendo = (7, -(l - c) + 7)
-        direita_subindo = ((l + c) - 7, 7)
-        esquerda_descendo = (7, (l + c) - 7)
-        esquerda_subindo = (l - c, 0)
-    
-    if l>=c and l+c<=7:
-        direita_descendo = (7, -(l - c) + 7)
-        direita_subindo = (0, l + c)
-        esquerda_descendo = (l + c, 0)
-        esquerda_subindo = (l - c, 0)
-    
-    if l<=c and l+c>=7:
-        direita_descendo = (-(c - l) + 7, 7)
-        direita_subindo = ((l + c) - 7, 7)
-        esquerda_descendo = (7, (l + c) - 7)
-        esquerda_subindo = (0, c - l)
-    
-    return direita_descendo, direita_subindo, esquerda_descendo, esquerda_subindo
+    """Analisa os limites diagonais (mantida para compatibilidade)."""
+    if l <= c and l + c <= 7:
+        d_desc = ((- (c - l) + 7), 7)
+        d_sub = (0, (l + c))
+        e_desc = ((l + c), 0)
+        e_sub = (0, (c - l))
+    elif l >= c and l + c >= 7:
+        d_desc = (7, -(l - c) + 7)
+        d_sub = ((l + c) - 7, 7)
+        e_desc = (7, (l + c) - 7)
+        e_sub = (l - c, 0)
+    elif l >= c and l + c <= 7:
+        d_desc = (7, -(l - c) + 7)
+        d_sub = (0, l + c)
+        e_desc = (l + c, 0)
+        e_sub = (l - c, 0)
+    else:
+        d_desc = (-(c - l) + 7, 7)
+        d_sub = ((l + c) - 7, 7)
+        e_desc = (7, (l + c) - 7)
+        e_sub = (0, c - l)
+    return d_desc, d_sub, e_desc, e_sub
 
 def gera_posicoes(l_o, c_o):
-    """Gera a lista de posições validas dentro dos limites diagonais.
-    
-    Args:
-        l_o (int): Linha referente a peça a ser analizada
-        c_o (int): Coluna referente a peça a ser analizada
-        
-    Returns:
-        list: Lista de posições validas para a movimentação da dama.
-    """
-    
+    """Gera a lista de posicoes diagonais possiveis para dama."""
     pos_validas = []
-    
-    limites = limites_diagonais(l_o, c_o)
-
-    direita_descendo = limites[0]
-    direita_subindo = limites[1]
-    esquerda_descendo = limites[2]
-    esquerda_subindo = limites[3]
-    
-
-    l = l_o - 1
-    c = c_o + 1
-    while(l>=direita_subindo[0] and c<=direita_subindo[1]):
-        pos_validas.append([l, c])
-        l -= 1
-        c += 1
-            
-    l = l_o - 1
-    c = c_o - 1
-    while(l>=esquerda_subindo[0] and c>=esquerda_subindo[1]):
-        pos_validas.append([l, c])
-        l -= 1
-        c -= 1
-        
-    l = l_o + 1
-    c = c_o + 1
-    while(l<=direita_descendo[0] and c<=direita_descendo[1]):
-        pos_validas.append([l, c])
-        l += 1
-        c += 1
-        
-    l = l_o + 1
-    c = c_o - 1
-    while(l<=esquerda_descendo[0] and c>=esquerda_descendo[1]):
-        pos_validas.append([l, c])
-        l += 1
-        c -= 1
-        
+    for dl, dc in DIRECOES:
+        nl, nc = l_o + dl, c_o + dc
+        while dentro_tabuleiro(nl, nc):
+            pos_validas.append([nl, nc])
+            nl += dl
+            nc += dc
     return pos_validas
 
-def peca_a_capturar(l_o, c_o, l_d, c_d, x):
-    """Analiza a posição das peças a serem capituradas.
+def obter_movimentos_simples(matriz, l, c):
+    """Retorna lista de destinos [l_d, c_d] para movimento simples a partir de (l, c)."""
+    peca = matriz[l][c]
+    if peca == const.vazio:
+        return []
     
-    Args:
-        l_o (int): Linha referente a peça do jogador atual
-        c_o (int): Coluna referente a peça do jogador atual
-        l_d (int): Linha referente a posição de destino
-        c_d (int): Coluna referente a posição de destino
-        x (int): Número representando o jogadro atual
-        
-    Returns:
-        list: lista de coordenadas da peça a capturar
+    destinos = []
+    if eh_dama(peca):
+        for dl, dc in DIRECOES:
+            nl, nc = l + dl, c + dc
+            while dentro_tabuleiro(nl, nc) and matriz[nl][nc] == const.vazio:
+                destinos.append([nl, nc])
+                nl += dl
+                nc += dc
+    elif peca == const.pretas:
+        # Pretas andam para frente diminuindo a linha
+        for dl, dc in [(-1, -1), (-1, 1)]:
+            nl, nc = l + dl, c + dc
+            if dentro_tabuleiro(nl, nc) and matriz[nl][nc] == const.vazio:
+                destinos.append([nl, nc])
+    elif peca == const.brancas:
+        # Brancas andam para frente aumentando a linha
+        for dl, dc in [(1, -1), (1, 1)]:
+            nl, nc = l + dl, c + dc
+            if dentro_tabuleiro(nl, nc) and matriz[nl][nc] == const.vazio:
+                destinos.append([nl, nc])
+    return destinos
+
+def buscar_sequencias_captura_peca(matriz, l, c, pecas_capturadas=None, coroou=False):
+    """Busca recursivamente todas as sequencias de captura para a peca em (l, c).
+    
+    Aplica as regras oficiais brasileiras:
+    - Peca comum captura para frente e para tras saltando 1 peca adversaria para casa vazia.
+    - Dama voadora salta peca adversaria a distancia e aterrissa em qualquer casa vazia posterior.
+    - Proibido saltar duas pecas consecutivas sem casa vazia entre elas.
+    - Nao e permitido passar pela mesma peca capturada duas vezes no mesmo lance.
+    - Promocao a dama so ocorre se a pedra terminar o lance na linha de coroacao.
     """
-    coordenadas = []
+    if pecas_capturadas is None:
+        pecas_capturadas = set()
+
+    peca = matriz[l][c]
+    sequencias = []
+
+    joga_como_dama = eh_dama(peca) or coroou
+
+    if not joga_como_dama:
+        for dl, dc in DIRECOES:
+            p_l, p_c = l + dl, c + dc
+            d_l, d_c = l + 2 * dl, c + 2 * dc
+
+            if dentro_tabuleiro(d_l, d_c) and (p_l, p_c) not in pecas_capturadas:
+                if eh_adversario(peca, matriz[p_l][p_c]) and (matriz[d_l][d_c] == const.vazio or (d_l == l and d_c == c)):
+                    novas_capturadas = set(pecas_capturadas)
+                    novas_capturadas.add((p_l, p_c))
+                    
+                    chegou_fim = (peca == const.pretas and d_l == 0) or (peca == const.brancas and d_l == 7)
+                    
+                    sub_matriz = [row[:] for row in matriz]
+                    sub_matriz[l][c] = const.vazio
+                    sub_matriz[d_l][d_c] = peca
+                    
+                    # Continua tomando como pedra se houver capturas
+                    proximas = buscar_sequencias_captura_peca(sub_matriz, d_l, d_c, novas_capturadas, coroou=False)
+                    
+                    if proximas:
+                        for prox in proximas:
+                            sequencias.append({
+                                'caminho': [[l, c], [d_l, d_c]] + prox['caminho'][1:],
+                                'capturas': [[p_l, p_c]] + prox['capturas'],
+                                'vira_dama': prox['vira_dama']
+                            })
+                    else:
+                        sequencias.append({
+                            'caminho': [[l, c], [d_l, d_c]],
+                            'capturas': [[p_l, p_c]],
+                            'vira_dama': chegou_fim
+                        })
+    else:
+        for dl, dc in DIRECOES:
+            nl, nc = l + dl, c + dc
+            # Avanca por casas vazias
+            while dentro_tabuleiro(nl, nc) and matriz[nl][nc] == const.vazio:
+                nl += dl
+                nc += dc
+            
+            # Se encontrou peca adversaria ainda nao capturada
+            if dentro_tabuleiro(nl, nc) and eh_adversario(peca, matriz[nl][nc]) and (nl, nc) not in pecas_capturadas:
+                p_l, p_c = nl, nc
+                landing_l, landing_c = p_l + dl, p_c + dc
+                
+                # As casas logo apos a peca adversaria devem estar livres
+                while dentro_tabuleiro(landing_l, landing_c) and (matriz[landing_l][landing_c] == const.vazio or (landing_l == l and landing_c == c)):
+                    novas_capturadas = set(pecas_capturadas)
+                    novas_capturadas.add((p_l, p_c))
+                    
+                    sub_matriz = [row[:] for row in matriz]
+                    sub_matriz[l][c] = const.vazio
+                    sub_matriz[landing_l][landing_c] = peca
+                    
+                    proximas = buscar_sequencias_captura_peca(sub_matriz, landing_l, landing_c, novas_capturadas, coroou=True)
+                    if proximas:
+                        for prox in proximas:
+                            sequencias.append({
+                                'caminho': [[l, c], [landing_l, landing_c]] + prox['caminho'][1:],
+                                'capturas': [[p_l, p_c]] + prox['capturas'],
+                                'vira_dama': True
+                            })
+                    else:
+                        sequencias.append({
+                            'caminho': [[l, c], [landing_l, landing_c]],
+                            'capturas': [[p_l, p_c]],
+                            'vira_dama': True
+                        })
+                    landing_l += dl
+                    landing_c += dc
+
+    return sequencias
+
+def obter_todas_jogadas_jogador(matriz, jogador):
+    """Retorna o tipo de jogada disponivel ('captura', 'simples' ou 'nenhuma'),
+    o numero maximo de capturas e a lista de jogadas validas (com Lei da Maioria)."""
+    todas_capturas = []
     
-    if l_d == l_o + 2:
-        # capturando pra baixo
-        coordenadas.append(l_d + 1 if x==2 else l_d - 1)  # adiciona a linha de baixo
-    elif l_d == l_o - 2:
-        # capturando pra cima
-        coordenadas.append(l_d - 1 if x==2 else l_d + 1)  # adiciona a linha de cima
+    # Se houver uma peca no meio de uma captura multipla, ela e a unica que pode continuar
+    if const.peca_em_combo is not None:
+        l, c = const.peca_em_combo
+        seqs = buscar_sequencias_captura_peca(matriz, l, c)
+        if seqs:
+            max_c = max(len(s['capturas']) for s in seqs)
+            melhores = [s for s in seqs if len(s['capturas']) == max_c]
+            return 'captura', max_c, melhores
+        else:
+            # Combo terminou
+            const.peca_em_combo = None
 
-    if c_d == c_o + 2:
-        # capturando pra direita
-        coordenadas.append(c_d + 1 if x==2 else c_d - 1)  # adiciona a coluna da direita
-    elif c_d == c_o - 2:
-        # capturando pra esquerda
-        coordenadas.append(c_d - 1 if x==2 else c_d + 1)  # adiciona a coluna da esquerda
-
-    return coordenadas
-
-def verifica_diagonais_dama(l, c, peca_alvo, lista, peca, pos_captura=False):
-    """Verifica as diagonais da dama em busca de peça a capturar.
-    
-    Args:
-        l (int): Linha da peça
-        c (int): Coluna da peça
-        peca_alvo: Tipo de peça a ser análizada
-        lista: Lista de obrigatoriedade de peças
-        peca: Tipo de peça do jogador
-        pos_captura (bool, opicional): Análise da jogada após a captura de peça.
+    for l in range(8):
+        for c in range(8):
+            peca = matriz[l][c]
+            if (jogador == 1 and eh_preta(peca)) or (jogador == 2 and eh_branca(peca)):
+                seqs = buscar_sequencias_captura_peca(matriz, l, c)
+                todas_capturas.extend(seqs)
+                
+    if todas_capturas:
+        # Lei da Maioria: obrigatorio escolher o caminho que toma mais pecas
+        max_cap = max(len(s['capturas']) for s in todas_capturas)
+        melhores_capturas = [s for s in todas_capturas if len(s['capturas']) == max_cap]
+        return 'captura', max_cap, melhores_capturas
         
-    Returns:
-        bool: Retorna um booleano referente a existencia de novas peças a capturar
-    """
-    
-    limites = limites_diagonais(l, c)
-
-    direita_descendo = verificar_movimentacao_dama((l, c), limites[0], peca)
-    direita_subindo = verificar_movimentacao_dama((l, c), limites[1], peca)
-    esquerda_descendo = verificar_movimentacao_dama((l, c), limites[2], peca)
-    esquerda_subindo = verificar_movimentacao_dama((l, c), limites[3], peca)
-
-    # Verifica se tem peça a capturar na direita subindo
-    if not direita_subindo[0] and direita_subindo[1] != False:
-        pos = direita_subindo[1]
-        if verifica_posicao(pos[2],pos[3]) == peca_alvo:
-            if pos_captura and (verifica_posicao(pos[0], pos[1]) == const.vazio):
-                lista.append([pos[2], pos[3]])
-    
-    # Verifica se tem peça a capturar na esquerda subindo
-    if not esquerda_subindo[0] and esquerda_subindo[1] != False:
-        pos = esquerda_subindo[1]
-        if verifica_posicao(pos[2],pos[3]) == peca_alvo:
-            if pos_captura and (verifica_posicao(pos[0], pos[1]) == const.vazio):
-                lista.append([pos[2], pos[3]])
-    
-    # Verifica se tem peça a capturar na direita descendo
-    if not direita_descendo[0] and direita_descendo[1] != False:
-        pos = direita_descendo[1]
-        if verifica_posicao(pos[2],pos[3]) == peca_alvo:
-            if pos_captura and (verifica_posicao(pos[0], pos[1]) == const.vazio):
-                lista.append([pos[2], pos[3]])
-    
-    # Verifica se tem peça a capturar na esquerda descendo
-    if not esquerda_descendo[0] and esquerda_descendo[1] != False:
-        pos = esquerda_descendo[1]
-        if verifica_posicao(pos[2],pos[3]) == peca_alvo:
-            if pos_captura and (verifica_posicao(pos[0], pos[1]) == const.vazio):
-                lista.append([pos[2], pos[3]])
-            
-    return pos_captura and len(lista) > 0
-
-def verifica_diagonais(l, c, peca_alvo, lista, pos_captura=False):
-    """Verificação das diagonais referente a uma peça normal (não dama)
-    
-    Args:
-        l (int): Linha da peça
-        c (int): Coluna da peça
-        peca_alvo: Tipo de a ser análizada
-        lista: Lista de obrigatoriedade 
-        pos_captura (bool, opicional): Análise da jogada após a captura de peça.
+    # Se nao ha capturas, busca movimentos simples
+    movimentos_simples = []
+    for l in range(8):
+        for c in range(8):
+            peca = matriz[l][c]
+            if (jogador == 1 and eh_preta(peca)) or (jogador == 2 and eh_branca(peca)):
+                destinos = obter_movimentos_simples(matriz, l, c)
+                for d in destinos:
+                    movimentos_simples.append({
+                        'origem': [l, c],
+                        'destino': d,
+                        'vira_dama': (peca == const.pretas and d[0] == 0) or (peca == const.brancas and d[0] == 7) or eh_dama(peca)
+                    })
+                    
+    if movimentos_simples:
+        return 'simples', 0, movimentos_simples
         
-    Returns:
-        bool: Retorna um booleano referente a existencia de novas peças a capturar
-    """
-        
-    #Verificar as diagonais ao lado
-    diagonal_superior_esquerda = verifica_posicao(l - 1, c - 1)
-    diagonal_superior_direita = verifica_posicao(l - 1, c + 1)
-    diagonal_inferior_direita = verifica_posicao(l + 1, c + 1)
-    diagonal_inferior_esquerda = verifica_posicao(l + 1, c - 1)
-    
-    #Lista de posição da diagonal da 2º casa a frente
-    diag_sup_esq_2 = [l - 2, c - 2]
-    diag_sup_dir_2 = [l - 2, c + 2]
-    diag_inf_dir_2 = [l + 2, c + 2]
-    diag_inf_esq_2 = [l + 2, c - 2]
-    
-    #Lista das posições da diagonal da 1º casa a frente
-    diag_sup_esq_1 = [l - 1, c - 1]
-    diag_sup_dir_1 = [l - 1, c + 1]
-    diag_inf_dir_1 = [l + 1, c + 1]
-    diag_inf_esq_1 = [l + 1, c - 1]
+    return 'nenhuma', 0, []
 
-    if diagonal_superior_direita == peca_alvo:
-        if pos_captura and verifica_posicao(diag_sup_dir_2[0], diag_sup_dir_2[1]) == const.vazio:
-            lista.append(diag_sup_dir_2)
-        elif not pos_captura and diagonal_inferior_esquerda == const.vazio:
-            lista.append(diag_inf_esq_1)
-            
-    if diagonal_superior_esquerda == peca_alvo:
-        if pos_captura and verifica_posicao(diag_sup_esq_2[0], diag_sup_esq_2[1]) == const.vazio:
-            lista.append(diag_sup_esq_2)
-        elif not pos_captura and diagonal_inferior_direita == const.vazio:
-            lista.append(diag_inf_dir_1)
-            
-    if diagonal_inferior_direita == peca_alvo:
-        if pos_captura and verifica_posicao(diag_inf_dir_2[0], diag_inf_dir_2[1]) == const.vazio:
-            lista.append(diag_inf_dir_2)
-        elif not pos_captura and diagonal_superior_esquerda == const.vazio:
-            lista.append(diag_sup_esq_1)
-            
-    if diagonal_inferior_esquerda == peca_alvo:
-        if pos_captura and verifica_posicao(diag_inf_esq_2[0], diag_inf_esq_2[1]) == const.vazio:
-            lista.append(diag_inf_esq_2)
-        elif not pos_captura and diagonal_superior_direita == const.vazio:
-            lista.append(diag_sup_dir_1)
+def atualiza_obrigatorios():
+    """Atualiza as listas de captura obrigatoria para o estado atual."""
+    const.obrigatorio_preta = []
+    const.obrigatorio_branca = []
 
-    return pos_captura and len(lista) > 0
+    tipo1, _, jogs1 = obter_todas_jogadas_jogador(const.matriz, 1)
+    if tipo1 == 'captura':
+        destinos = []
+        for j in jogs1:
+            d = j['caminho'][1]
+            if d not in destinos:
+                destinos.append(d)
+        const.obrigatorio_preta = destinos
 
+    tipo2, _, jogs2 = obter_todas_jogadas_jogador(const.matriz, 2)
+    if tipo2 == 'captura':
+        destinos = []
+        for j in jogs2:
+            d = j['caminho'][1]
+            if d not in destinos:
+                destinos.append(d)
+        const.obrigatorio_branca = destinos
+
+def peca_a_capturar(l_o, c_o, l_d, c_d, x=None):
+    """Encontra a peca capturada entre (l_o, c_o) e (l_d, c_d)."""
+    step_l = 1 if l_d > l_o else -1
+    step_c = 1 if c_d > c_o else -1
+    cur_l = l_o + step_l
+    cur_c = c_o + step_c
+    while (cur_l, cur_c) != (l_d, c_d):
+        if const.matriz[cur_l][cur_c] != const.vazio:
+            return [cur_l, cur_c]
+        cur_l += step_l
+        cur_c += step_c
+    return []
 
 def captura(l_o, c_o, l_d, c_d, jogador):
-    """Realiza a captura da peça de uma peça
-    
-    Args:
-        l_o (int): Linha de origem da jogada
-        c_o (int): Coluna de origem da jogada
-        l_d (int): Linha de destino da jogada
-        c_d (int): Coluna de destino da jogada
-        jogador (int): Tipo do jogador
-    """
+    """Realiza a remocao da peca capturada e atualiza as posicoes e contadores."""
+    coord = peca_a_capturar(l_o, c_o, l_d, c_d)
+    if coord:
+        p_l, p_c = coord
+        peca_capturada = const.matriz[p_l][p_c]
+        const.matriz[p_l][p_c] = const.vazio
 
-    # Peças pretas
-    if jogador == 1:
-        
-        peca_dir_frente = verifica_posicao(l_o - 1, c_o + 1)
-        peca_esq_frente = verifica_posicao(l_o - 1, c_o - 1)
-        peca_dir_traz = verifica_posicao(l_o + 1, c_o + 1)
-        peca_esq_traz = verifica_posicao(l_o + 1, c_o - 1)
-        
-        # direita-frente
-        if  (peca_dir_frente == const.brancas or peca_dir_frente == const.dama_branca) and (l_o-2 == l_d and c_o+2 == c_d):
+        if jogador == 1:
             const.quant_pecas_j2 -= 1
-            const.matriz[l_d][c_d] = const.pretas if l_d != 0 else const.dama_preta
-            const.matriz[l_o - 1][c_o + 1] = const.vazio
-            const.matriz[l_o][c_o] = const.vazio
-
-        # esquerda-frente
-        elif (peca_esq_frente == const.brancas or peca_esq_frente == const.dama_branca) and (l_o-2 == l_d and c_o-2 == c_d):
-            const.quant_pecas_j2 -= 1
-            const.matriz[l_d][c_d] = const.pretas if l_d != 0 else const.dama_preta
-            const.matriz[l_o - 1][c_o - 1] = const.vazio
-            const.matriz[l_o][c_o] = const.vazio
-            
-        # direta-traz
-        elif (peca_dir_traz == const.brancas or peca_dir_traz == const.dama_branca) and (l_o+2 == l_d and c_o+2 == c_d):
-            const.quant_pecas_j2 -= 1
-            const.matriz[l_d][c_d] = const.pretas if l_d != 0 else const.dama_preta
-            const.matriz[l_o + 1][c_o + 1] = const.vazio
-            const.matriz[l_o][c_o] = const.vazio
-            
-        # esquerda-traz
-        elif (peca_esq_traz == const.brancas or peca_esq_traz == const.dama_branca) and (l_o+2 == l_d and c_o-2 == c_d):
-            const.quant_pecas_j2 -= 1
-            const.matriz[l_d][c_d] = const.pretas if l_d != 0 else const.dama_preta
-            const.matriz[l_o + 1][c_o - 1] = const.vazio
-            const.matriz[l_o][c_o] = const.vazio
-
-    # Peças brancas
-    elif jogador == 2:
-        
-        peca_dir_traz = verifica_posicao(l_o - 1, c_o + 1)
-        peca_esq_traz = verifica_posicao(l_o - 1, c_o - 1)
-        peca_dir_frente = verifica_posicao(l_o + 1, c_o + 1)
-        peca_esq_frente = verifica_posicao(l_o + 1, c_o - 1)
-                
-        # direita-traz
-        if (peca_dir_traz == const.pretas or peca_dir_traz == const.dama_preta) and (l_o-2 == l_d and c_o+2 == c_d):
+            if peca_capturada == const.dama_branca:
+                const.quant_damas_j2 = max(0, const.quant_damas_j2 - 1)
+        else:
             const.quant_pecas_j1 -= 1
-            const.matriz[l_d][c_d] = const.brancas if l_d != 7 else const.dama_branca
-            const.matriz[l_o - 1][c_o + 1] = const.vazio
-            const.matriz[l_o][c_o] = const.vazio
+            if peca_capturada == const.dama_preta:
+                const.quant_damas_j1 = max(0, const.quant_damas_j1 - 1)
 
-        # esquerda-traz
-        elif (peca_esq_traz == const.pretas or peca_esq_traz == const.dama_preta) and (l_o-2 == l_d and c_o-2 == c_d):
-            const.quant_pecas_j1 -= 1
-            const.matriz[l_d][c_d] = const.brancas if l_d != 7 else const.dama_branca
-            const.matriz[l_o - 1][c_o - 1] = const.vazio
-            const.matriz[l_o][c_o] = const.vazio
+    # Move a peca atacante para o destino
+    const.matriz[l_d][c_d] = const.matriz[l_o][c_o]
+    const.matriz[l_o][c_o] = const.vazio
 
-        # direita-frente
-        elif (peca_dir_frente == const.pretas or peca_dir_frente == const.dama_preta) and (l_o+2 == l_d and c_o+2 == c_d):
-            const.quant_pecas_j1 -= 1
-            const.matriz[l_d][c_d] = const.brancas if l_d != 7 else const.dama_branca
-            const.matriz[l_o + 1][c_o + 1] = const.vazio
-            const.matriz[l_o][c_o] = const.vazio
+    # Captura zera o contador de estagnacao de damas
+    const.quant_jogadas_con_j1 = 0
+    const.quant_jogadas_con_j2 = 0
 
-        # esquerda-frente
-        elif (peca_esq_frente == const.pretas or peca_esq_frente == const.dama_preta) and (l_o+2 == l_d and c_o-2 == c_d):
-            const.quant_pecas_j1 -= 1
-            const.matriz[l_d][c_d] = const.brancas if l_d != 7 else const.dama_branca
-            const.matriz[l_o + 1][c_o - 1] = const.vazio
-            const.matriz[l_o][c_o] = const.vazio
+def verifica_diagonais(l, c, peca_alvo, lista, pos_captura=False):
+    """Mantida para compatibilidade com assinaturas antigas."""
+    atualiza_obrigatorios()
+    return len(const.obrigatorio_preta if eh_preta(const.matriz[l][c]) else const.obrigatorio_branca) > 0
+
+def verifica_diagonais_dama(l, c, peca_alvo, lista, peca, pos_captura=False):
+    """Mantida para compatibilidade com assinaturas antigas."""
+    atualiza_obrigatorios()
+    return len(const.obrigatorio_preta if peca == 1 or peca == const.dama_preta else const.obrigatorio_branca) > 0
 
 def verificar_movimentacao_dama(origem, destino, peca):
-    """Validação da movimentação da dama (verifica a existencia de peças
-    dentro da diagonal)
-    
-    Args:
-        origem (list): Lista com as posições de origem da dama
-        destino (list): Lista com as posições de destino da dama
-        peca (int): Tipo de peça
-        
-    Returns:
-        list: Lista com dois booleanos falsos representando uma jogada
-            invalida (há peças no caminho e são aliadas).
-        list: Lista com dois booleanos (verdadeiro e falso) representando
-            uma jogada livre (não há peças no caminho).
-        list: Lista com um booleano e uma lista de valores representando
-            uma possivel captura (há peças no caminho e é inimiga).
-    """
-    
-    direita_subindo =   origem[0] > destino[0] and origem[1] < destino[1]
-    esquerda_subindo =  origem[0] > destino[0] and origem[1] > destino[1]
-    direita_descendo =  origem[0] < destino[0] and origem[1] < destino[1]
-    esquerda_descendo = origem[0] < destino[0] and origem[1] > destino[1]
-    
-    
-    if direita_subindo:
-        l = origem[0] - 1
-        c = origem[1] + 1
-        while(l>=destino[0] and c<=destino[1]):
-            if const.matriz[l][c] != const.vazio:
-                if peca == 1 and (const.matriz[l][c] == const.pretas or const.matriz[l][c] == const.dama_preta):
-                    return [False, False]
-                elif peca == 2 and (const.matriz[l][c] == const.brancas or const.matriz[l][c] == const.dama_branca):
-                    return [False, False]
-                else:
-                    return [False, (l-1, c+1, l, c)] #Diz que a movimentação não pode ocorrer, e diz a posição da peça
-            l -= 1
-            c += 1
-            
-    if esquerda_subindo:
-        l = origem[0] - 1
-        c = origem[1] - 1
-        while(l>=destino[0] and c>=destino[1]):
-            if const.matriz[l][c] != const.vazio:
-                if peca == 1 and (const.matriz[l][c] == const.pretas or const.matriz[l][c] == const.dama_preta):
-                    return [False, False]
-                elif peca == 2 and (const.matriz[l][c] == const.brancas or const.matriz[l][c] == const.dama_branca):
-                    return [False, False]
-                else:
-                    return [False, (l-1, c-1, l, c)] #Diz que a movimentação não pode ocorrer, e diz a posição da peça
-            l -= 1
-            c -= 1
-            
-    if direita_descendo:
-        l = origem[0] + 1
-        c = origem[1] + 1
-        while(l<=destino[0] and c<=destino[1]):
-            if const.matriz[l][c] != const.vazio:
-                if peca == 1 and (const.matriz[l][c] == const.pretas or const.matriz[l][c] == const.dama_preta):
-                    return [False, False]
-                elif peca == 2 and (const.matriz[l][c] == const.brancas or const.matriz[l][c] == const.dama_branca):
-                    return [False, False]
-                else:
-                    return [False, (l+1, c+1, l, c)] #Diz que a movimentação não pode ocorrer, e diz a posição da peça
-            l += 1
-            c += 1
-            
-    if esquerda_descendo:
-        l = origem[0] + 1
-        c = origem[1] - 1
-        while(l<=destino[0] and c>=destino[1]):
-            if const.matriz[l][c] != const.vazio:
-                if peca == 1 and (const.matriz[l][c] == const.pretas or const.matriz[l][c] == const.dama_preta):
-                    return [False, False]
-                elif peca == 2 and (const.matriz[l][c] == const.brancas or const.matriz[l][c] == const.dama_branca):
-                    return [False, False]
-                else:
-                    return [False, (l+1, c-1, l, c)] #Diz que a movimentação não pode ocorrer, e diz a posição da peça
-            l += 1
-            c -= 1
-            
-    return [True, False]
+    """Mantida para compatibilidade com assinaturas antigas."""
+    l_o, c_o = origem
+    l_d, c_d = destino
+    destinos = obter_movimentos_simples(const.matriz, l_o, c_o)
+    if [l_d, c_d] in destinos:
+        return [True, False]
+    cap = peca_a_capturar(l_o, c_o, l_d, c_d)
+    if cap:
+        return [False, (l_d, c_d, cap[0], cap[1])]
+    return [False, False]
 
 def movimentacao(l_o, c_o, l_d, c_d, jogador):
-    """Controle da movimentação de peças.
+    """Controle da movimentacao de pecas.
     
     Args:
-        l_o (int): Linha de origem da jogada
-        c_o (int): Coluna de origem da jogada
-        l_d (int): Linha de destino da jogada
-        c_d (int): Coluna de destino da jogada
-        jogador (int): Tipo do jogador
+        l_o (int): Linha de origem
+        c_o (int): Coluna de origem
+        l_d (int): Linha de destino
+        c_d (int): Coluna de destino
+        jogador (int): Jogador atual (1 para pretas, 2 para brancas)
         
     Returns:
-        bool: Retorna um booleano representando a troca de jogador
+        bool: Retorna True se a jogada foi concluida e passa a vez.
+              Retorna False se o lance continua (captura multipla) ou se a jogada foi invalida.
     """
-    # Condições para movimentações não possiveis
-    if l_o == l_d:
+    # 1. Validacao de limites e casas do tabuleiro
+    if not (dentro_tabuleiro(l_o, c_o) and dentro_tabuleiro(l_d, c_d)):
+        print('\033[31mMovimentação inválida, posição fora do tabuleiro!\033[0;0m')
+        return False
+
+    if not (casa_jogavel(l_o, c_o) and casa_jogavel(l_d, c_d)):
+        print('\033[31mMovimentação inválida, as peças só podem mover nas casas escuras!\033[0;0m')
+        return False
+
+    if l_o == l_d or c_o == c_d:
         print('\033[31mMovimentação inválida, a peça só pode mover para a diagonal!\033[0;0m')
         return False
 
-    if c_o == c_d:
-        print('\033[31mMovimentação inválida, a peça só pode mover para a diagonal!\033[0;0m')
+    if abs(l_d - l_o) != abs(c_d - c_o):
+        print('\033[31mMovimentação inválida, o movimento deve ser em diagonal perfeita!\033[0;0m')
+        return False
+
+    peca_origem = const.matriz[l_o][c_o]
+    if peca_origem == const.vazio:
+        print('\033[31mPosição inválida, não existe peça nessa posição!\033[0;0m')
         return False
 
     if const.matriz[l_d][c_d] != const.vazio:
         print('\033[31mMovimentação inválida, já existe uma peça nessa posição!\033[0;0m')
         return False
 
-    # Verifica se é dama
-    eh_dama = const.matriz[l_o][c_o] == const.dama_preta or const.matriz[l_o][c_o] == const.dama_branca
+    # 2. Validacao de posse da peca
+    if jogador == 1 and not eh_preta(peca_origem):
+        print('\033[31mJogada inválida! Você só pode mover suas próprias peças (pretas).\033[0;0m')
+        return False
 
-    diagonal_proximo = [
-        [l_o - 1, c_o - 1], # diagonal superior esquerda
-        [l_o - 1, c_o + 1], # diagonal superior direita
-        [l_o + 1, c_o + 1], # diagonal inferior direita
-        [l_o + 1, c_o - 1]  # diagonal inferior esquerda
-    ]
+    if jogador == 2 and not eh_branca(peca_origem):
+        print('\033[31mJogada inválida! Você só pode mover suas próprias peças (brancas).\033[0;0m')
+        return False
 
-    # Para as peças pretas
-    if jogador == 1:
-
-        if const.obrigatorio_preta != [] and [l_d, c_d] in diagonal_proximo:
-            print('\033[31mMovimentação inválida, você é obrigado capturar a peça rival!\033[0;0m')
+    # 3. Validacao de captura em andamento (combo)
+    if const.peca_em_combo is not None:
+        if [l_o, c_o] != const.peca_em_combo:
+            print(f'\033[31mCaptura múltipla em andamento! Você deve continuar com a peça em ({const.peca_em_combo[0]}, {const.peca_em_combo[1]})!\033[0;0m')
             return False
 
-        if eh_dama and const.matriz[l_o][c_o] == const.dama_preta:
+    # 4. Obter jogadas legais no estado atual
+    tipo_jogada, max_capturas, jogadas_validas = obter_todas_jogadas_jogador(const.matriz, jogador)
+
+    if tipo_jogada == 'nenhuma':
+        print('\033[31mVocê não possui movimentos válidos!\033[0;0m')
+        return False
+
+    # 5. Se houver captura obrigatoria disponivel
+    if tipo_jogada == 'captura':
+        # Checar se a peca escolhida e uma peca que pode realizar a captura maxima (Lei da Maioria)
+        origens_validas = [j['caminho'][0] for j in jogadas_validas]
+        if [l_o, c_o] not in origens_validas:
+            print(f'\033[31mMovimentação inválida! Você é obrigado a capturar a peça rival (Lei da Maioria: {max_capturas} captura(s))!\033[0;0m')
+            return False
+
+        # Checar se o destino escolhido e o primeiro salto de alguma das sequencias maximas validas
+        saltos_validos = [j['caminho'][1] for j in jogadas_validas if j['caminho'][0] == [l_o, c_o]]
+        if [l_d, c_d] not in saltos_validos:
+            print('\033[31mDestino inválido para a captura!\033[0;0m')
+            return False
+
+        # Realizar a captura
+        captura(l_o, c_o, l_d, c_d, jogador)
+
+        # Checar se a peca que acabou de capturar AINDA TEM capturas adicionais a fazer
+        prox_seqs = buscar_sequencias_captura_peca(const.matriz, l_d, c_d)
+        if prox_seqs:
+            const.peca_em_combo = [l_d, c_d]
+            atualiza_obrigatorios()
+            print('\033[33mCaptura realizada! Continue a captura múltipla com a mesma peça.\033[0;0m')
+            return False  # Mantem a vez com o mesmo jogador
+        else:
+            # Lance completo!
+            const.peca_em_combo = None
             
-            pos_validas = gera_posicoes(l_o, c_o)
-            
-            if [l_d, c_d] not in pos_validas:
-                print('\033[31mMovimentação além do permitido!\033[0;0m')
-                return False
-            
-            nao_tem_peca, peca_meio_1 = verificar_movimentacao_dama((l_o, c_o), (l_d, c_d), jogador)
-            
-            if nao_tem_peca:
-                # Movimentação simples
+            # Promocao a dama ao finalizar o lance na linha de coroacao
+            peca_atual = const.matriz[l_d][c_d]
+            if peca_atual == const.pretas and l_d == 0:
                 const.matriz[l_d][c_d] = const.dama_preta
-                const.matriz[l_o][c_o] = const.vazio
-                
-                const.obrigatorio_preta = []
-                const.obrigatorio_branca = []
-                
-                verifica_dama = verifica_diagonais_dama(l_d, c_d, const.brancas, const.obrigatorio_preta, jogador, True)
-                verifica_peca = verifica_diagonais(l_d, c_d, const.brancas, const.obrigatorio_preta, True)  
-                
-                const.quant_jogadas_con_j1 += 1
-                
-                return True
-            
-            elif peca_meio_1 != False:
-                nao_tem_peca, peca_meio_2 = verificar_movimentacao_dama((peca_meio_1[0], peca_meio_1[1]), (l_d, c_d), jogador)
-                if nao_tem_peca and not peca_meio_2:
-                    #Captura
-
-                    # Altera a posição da dama
-                    const.matriz[l_d][c_d] = const.dama_preta
-                    const.matriz[l_o][c_o] = const.vazio
-
-                    const.matriz[peca_meio_1[2]][peca_meio_1[3]] = const.vazio
-                    const.quant_pecas_j2 -= 1
-                    
-                    const.obrigatorio_preta = []
-                    const.obrigatorio_branca = []
-
-                    ret = True
-                    
-                    verifica_dama = verifica_diagonais_dama(l_d, c_d, const.brancas, const.obrigatorio_preta, jogador, True)
-                    verifica_peca = verifica_diagonais(l_d, c_d, const.brancas, const.obrigatorio_preta, True)
-                    
-                    if verifica_dama or verifica_peca:
-                        ret = False
-                    verifica_diagonais(l_d, c_d, const.brancas, const.obrigatorio_branca)
-                    
-                    const.quant_jogadas_con_j1 = 0
-                    return ret
-                
-                else:
-                    print('\033[31mJogada inválida. Você só pode capturar uma peça de cada vez!\033[0;0m')
-                    return False
-            else:
-                print('\033[31mMovimentação além do permitido!\033[0;0m')
-                return False
-        elif eh_dama and const.matriz[l_o][c_o] != const.dama_preta:
-            print('\033[31mJogada inválida. Vez do jogador 2!\033[0;0m')
-            return False
-        else:
-            # Movimentação simples (quando move apenas uma casa)
-            if( (l_d == l_o - 1 and c_d == c_o + 1) or (l_d == l_o - 1 and c_d == c_o - 1)) and const.obrigatorio_preta == []:
-                if (l_d != l_o - 1 or c_d != c_o - 1) and (l_d != l_o - 1 or c_d != c_o + 1):
-                    print('\033[31mMovimentação além do permitido!\033[0;0m')
-                    return False
-                else:
-                    const.matriz[l_d][c_d] = const.pretas
-                    const.matriz[l_o][c_o] = const.vazio
-                    
-                    const.obrigatorio_preta = []
-                    const.obrigatorio_branca = []
-                    
-                    verifica_diagonais(l_d, c_d, const.brancas, const.obrigatorio_preta, True)
-                    verifica_diagonais(l_d, c_d, const.brancas, const.obrigatorio_branca)
-                    
-                    if l_d == 0:
-                        const.matriz[l_d][c_d] = const.dama_preta
-                    
-                    const.quant_jogadas_con_j1 = 0
-                    
-                    return True
-                
-            # Movimentação de captura
-            elif const.obrigatorio_preta != []:
-                # Se houver alguma peca obrigatoria para capturar
-                if [l_d, c_d] not in const.obrigatorio_preta:
-                    print('\033[31mMovimentação inválida, você é obrigado capturar a peça rival!\033[0;0m')
-                    return False
-
-                captura(l_o, c_o, l_d, c_d, jogador)
-                const.obrigatorio_preta = []
-                const.obrigatorio_branca = []
-                
-                const.quant_jogadas_con_j1 = 0
-                
-                # Procura nas diagonais se há mais alguma peça inimiga para capturar
-                if verifica_diagonais(l_d, c_d, const.brancas, const.obrigatorio_preta, True):
-                    # Ainda tem coisa para esse jogador pra fazer,
-                    return False    # por isso retorna False para voltar a vez pra ele de novo.
-                else:
-                    # caso não haja inimigos, verifica se essa peça ficou em uma posição vulnerável
-                    verifica_diagonais(l_d, c_d, const.brancas, const.obrigatorio_branca)
-                    # caso tenha ficado, adiciona ela na lista de captura dos inimigos
-                    return True
-            else:
-                print('\033[31mMovimentação inválida, a peça só pode mover na diagonal para frente!\033[0;0m')
-                return False
-
-    # Para as peças brancas
-    elif jogador == 2:
-
-        if const.obrigatorio_branca != [] and [l_d, c_d] in diagonal_proximo:
-            print('\033[31mMovimentação inválida, você é obrigado capturar a peça rival!\033[0;0m')
-            return False
-
-        if eh_dama and const.matriz[l_o][c_o] == const.dama_branca:
-            
-            pos_validas = gera_posicoes(l_o, c_o)
-            
-            if [l_d, c_d] not in pos_validas:
-                print('\033[31mMovimentação além do permitido!\033[0;0m')
-                return False
-            
-            nao_tem_peca, peca_meio_1 = verificar_movimentacao_dama((l_o, c_o), (l_d, c_d), jogador)
-            
-            if nao_tem_peca:
-                # Movimentação simples
+                const.quant_damas_j1 += 1
+                print('\033[32mPeça promovida para DAMA!\033[0;0m')
+            elif peca_atual == const.brancas and l_d == 7:
                 const.matriz[l_d][c_d] = const.dama_branca
-                const.matriz[l_o][c_o] = const.vazio
-                
-                const.obrigatorio_preta = []
-                const.obrigatorio_branca = []
-                
-                verifica_diagonais_dama(l_d, c_d, const.pretas, const.obrigatorio_branca, jogador, True)
-                verifica_diagonais(l_d, c_d, const.pretas, const.obrigatorio_preta)
-                
-                const.quant_jogadas_con_j2 += 1
-                
-                return True
-            
-            elif peca_meio_1 != False:
-                nao_tem_peca, peca_meio_2 = verificar_movimentacao_dama((peca_meio_1[0], peca_meio_1[1]), (l_d, c_d), jogador)
-                if nao_tem_peca and not peca_meio_2:
-                    #Captura
+                const.quant_damas_j2 += 1
+                print('\033[32mPeça promovida para DAMA!\033[0;0m')
 
-                    const.matriz[l_d][c_d] = const.dama_branca
-                    const.matriz[l_o][c_o] = const.vazio
+            atualiza_obrigatorios()
+            return True  # Passa a vez
 
-                    const.matriz[peca_meio_1[2]][peca_meio_1[3]] = const.vazio
-                    const.quant_pecas_j1 -= 1
-                    
-                    const.obrigatorio_preta = []
-                    const.obrigatorio_branca = []
-                                        
-                    ret = True
-                    
-                    verifica_dama = verifica_diagonais_dama(l_d, c_d, const.pretas, const.obrigatorio_branca, jogador, True)
-                    verifica_peca = verifica_diagonais(l_d, c_d, const.pretas, const.obrigatorio_branca, True)
-                    
-                    if verifica_dama or verifica_peca:
-                        ret = False
-
-                    verifica_diagonais(l_d, c_d, const.pretas, const.obrigatorio_preta)
-                    
-                    const.quant_jogadas_con_j2 = 0
-                    
-                    return ret
-                else:
-                    print('\033[31mJogada inválida. Você só pode capturar uma peça de cada vez!\033[0;0m')
-                    return False
+    # 6. Se nao ha captura, validar movimento simples
+    if tipo_jogada == 'simples':
+        destinos_permitidos = [j['destino'] for j in jogadas_validas if j['origem'] == [l_o, c_o]]
+        if [l_d, c_d] not in destinos_permitidos:
+            if eh_dama(peca_origem):
+                print('\033[31mMovimentação inválida para a dama!\033[0;0m')
             else:
-                print('\033[31mMovimentação além do permitido!\033[0;0m')
-                return False
-        elif eh_dama and const.matriz[l_o][c_o] != const.dama_branca:
-            print('\033[31mJogada inválida. Vez do jogador 2!\033[0;0m')
+                print('\033[31mMovimentação inválida! A peça só pode mover na diagonal para frente!\033[0;0m')
             return False
-        else:
-            # Movimentação simples (quando move apenas uma casa)
-            if ((l_d == l_o + 1 and c_d == c_o + 1) or (l_d == l_o + 1 and c_d == c_o - 1)) and const.obrigatorio_branca == []:
-                if (l_d != l_o + 1 or c_d != c_o - 1) and (l_d != l_o + 1 or c_d != c_o + 1):
-                    print('\033[31mMovimentação além do permitido!\033[0;0m')
-                    return False
-                else:
-                    const.matriz[l_d][c_d] = const.brancas
-                    const.matriz[l_o][c_o] = const.vazio
-                    
-                    const.obrigatorio_preta = []
-                    const.obrigatorio_branca = []
-                    
-                    verifica_diagonais(l_d, c_d, const.pretas, const.obrigatorio_branca, True)
-                    verifica_diagonais(l_d, c_d, const.pretas, const.obrigatorio_preta)
-                    
-                    const.quant_jogadas_con_j2 = 0
-                    
-                    if l_d == 7:
-                        const.matriz[l_d][c_d] = const.dama_branca
-                    
-                    return True
-                
-            # Movimentação de captura
-            elif const.obrigatorio_branca != []:
-                # Se houver alguma peca obrigatoria para capturar
-               
-                if [l_d, c_d] not in const.obrigatorio_branca:
-                    print('\033[31mMovimentação inválida, você é obrigado capturar a peça rival!\033[0;0m')
-                    return False
 
-                captura(l_o, c_o, l_d, c_d, jogador)
-                
-                const.obrigatorio_preta = []
-                const.obrigatorio_branca = []
-                
-                const.quant_jogadas_con_j2 = 0
+        # Executa o movimento simples
+        const.matriz[l_d][c_d] = peca_origem
+        const.matriz[l_o][c_o] = const.vazio
 
-                # Procura nas diagonais se há mais alguma peça inimiga para capturar
-                if verifica_diagonais(l_d, c_d, const.pretas, const.obrigatorio_branca, True):
-                    
-                    # Ainda tem coisa para esse jogador pra fazer,
-                    return False    # por isso retorna False para voltar a vez pra ele de novo.
-                else:
-                    # caso não haja inimigos, verifica se essa peça ficou em uma posição vulnerável
-                    verifica_diagonais(l_d, c_d, const.pretas, const.obrigatorio_preta)
-                    # caso tenha ficado, adiciona ela na lista de captura dos inimigos
-                    return True
+        # Contagem para empate (20 jogadas consecutivas de damas sem captura)
+        if eh_dama(peca_origem):
+            if jogador == 1:
+                const.quant_jogadas_con_j1 += 1
             else:
-                print('\033[31mMovimentação inválida, a peça só pode mover na diagonal para frente!\033[0;0m')
-                return False
+                const.quant_jogadas_con_j2 += 1
+        else:
+            # Qualquer movimento de pedra simples reseta o contador de ambos os lados
+            const.quant_jogadas_con_j1 = 0
+            const.quant_jogadas_con_j2 = 0
 
-    return True
+            # Promocao a dama
+            if peca_origem == const.pretas and l_d == 0:
+                const.matriz[l_d][c_d] = const.dama_preta
+                const.quant_damas_j1 += 1
+                print('\033[32mPeça promovida para DAMA!\033[0;0m')
+            elif peca_origem == const.brancas and l_d == 7:
+                const.matriz[l_d][c_d] = const.dama_branca
+                const.quant_damas_j2 += 1
+                print('\033[32mPeça promovida para DAMA!\033[0;0m')
+
+        atualiza_obrigatorios()
+        return True  # Passa a vez
+
+    return False

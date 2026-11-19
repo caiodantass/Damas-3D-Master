@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Damas 3D Master | Edição Realista e Imersiva</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>♟️</text></svg>">
+</head>
+<body>
+
+    <!-- Container do Renderizador 3D (WebGL / Three.js) -->
+    <div id="canvas-container"></div>
+
+    <!-- Interface HUD Sobreposta (Glassmorphism) -->
+    <div class="ui-overlay">
+        
+        <!-- Barra Superior: Logo e Placar -->
+        <header class="top-bar">
+            <div class="logo-container">
+                <span class="logo-icon">♟️</span>
+                <div class="logo-text">
+                    <h1>DAMAS 3D</h1>
+                    <span class="badge">PRO EDITION</span>
+                </div>
+            </div>
+
+            <!-- Placar Central -->
+            <div class="scoreboard">
+                <div class="player-card black-card">
+                    <div class="piece-symbol">○</div>
+                    <div class="player-info">
+                        <span class="player-name">Jogador 1 (Pretas)</span>
+                        <div class="player-stats">
+                            <span class="stat-pieces" id="score-black">12</span>
+                            <span class="stat-kings">(<span id="kings-black">0</span> 👑)</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="turn-indicator-wrap">
+                    <div class="turn-badge black-turn" id="turn-indicator">
+                        <span id="turn-text">Sua Vez (Pretas)</span>
+                    </div>
+                </div>
+
+                <div class="player-card white-card">
+                    <div class="piece-symbol">●</div>
+                    <div class="player-info">
+                        <span class="player-name">Jogador 2 / IA (Brancas)</span>
+                        <div class="player-stats">
+                            <span class="stat-pieces" id="score-white">12</span>
+                            <span class="stat-kings">(<span id="kings-white">0</span> 👑)</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Botão de Som Rápido -->
+            <button class="btn" id="btn-sound">
+                <span class="icon">🔊</span> Som: Ligado
+            </button>
+        </header>
+
+        <!-- Banner de Mensagens Dinâmicas (Lei da Maioria / Combo) -->
+        <div class="status-banner" id="status-banner">
+            <span id="status-icon">⚡</span>
+            <span id="status-text">Captura obrigatória ativa!</span>
+        </div>
+
+        <!-- Painel Lateral: Configurações e Histórico -->
+        <aside class="right-panel">
+            <h3 class="panel-title">Opções da Partida</h3>
+
+            <div class="form-group">
+                <label for="select-mode">Modo de Jogo</label>
+                <select id="select-mode">
+                    <option value="pve" selected>Jogador vs Máquina (IA)</option>
+                    <option value="pvp">Jogador vs Jogador (Local)</option>
+                </select>
+            </div>
+
+            <div class="form-group" id="difficulty-group">
+                <label for="select-difficulty">Nível da Máquina</label>
+                <select id="select-difficulty">
+                    <option value="easy">Iniciante (Fácil)</option>
+                    <option value="medium" selected>Estrategista (Médio)</option>
+                    <option value="hard">Mestre (Difícil / Minimax)</option>
+                </select>
+            </div>
+
+            <h3 class="panel-title" style="margin-top: 6px;">Histórico de Lances</h3>
+            <div class="moves-history" id="moves-history">
+                <!-- Registros dinâmicos de jogadas -->
+            </div>
+        </aside>
+
+        <!-- Barra Inferior: Ações e Câmeras -->
+        <footer class="bottom-bar">
+            <div class="action-buttons">
+                <button class="btn" id="btn-undo" title="Desfazer último lance">
+                    <span class="icon">↩</span> Desfazer
+                </button>
+                <button class="btn btn-primary" id="btn-reset" title="Reiniciar Partida">
+                    <span class="icon">🔄</span> Reiniciar Jogo
+                </button>
+            </div>
+
+            <!-- Seletores de Visão de Câmera 3D -->
+            <div class="camera-controls">
+                <button class="cam-btn active" data-cam="perspective" title="Visão Tridimensional Livre">
+                    🎥 3D Livre
+                </button>
+                <button class="cam-btn" data-cam="top" title="Visão Superior Tática (2D)">
+                    📐 Superior
+                </button>
+                <button class="cam-btn" data-cam="black" title="Visão do Jogador 1 (Pretas)">
+                    👤 Pretas
+                </button>
+                <button class="cam-btn" data-cam="white" title="Visão do Jogador 2 (Brancas)">
+                    👤 Brancas
+                </button>
+            </div>
+        </footer>
+
+    </div>
+
+    <!-- Modal de Vitória / Fim de Jogo -->
+    <div class="modal-backdrop" id="modal-gameover">
+        <div class="modal-content">
+            <div style="font-size: 3rem; margin-bottom: 10px;">🏆</div>
+            <h2 id="gameover-title">Vitória!</h2>
+            <p id="gameover-reason">Todas as peças adversárias foram eliminadas.</p>
+            <div class="modal-actions">
+                <button class="btn btn-primary btn-large" id="btn-play-again">
+                    Jogar Novamente
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts e Bibliotecas -->
+    <script src="libs/three.min.js"></script>
+    <script src="libs/OrbitControls.js"></script>
+    <script src="libs/canvas-confetti.min.js"></script>
+    <script src="js/audio.js"></script>
+    <script src="js/engine.js"></script>
+    <script src="js/ai.js"></script>
+    <script src="js/scene3d.js"></script>
+    <script src="js/app.js"></script>
+
+</body>
+</html>

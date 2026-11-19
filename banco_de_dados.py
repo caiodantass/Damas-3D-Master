@@ -32,7 +32,8 @@ def savegame():
         constantes.quant_jogadas_con_j1,
         constantes.quant_jogadas_con_j2,
         constantes.quant_jogadas_j1,
-        constantes.quant_jogadas_j2 
+        constantes.quant_jogadas_j2,
+        constantes.peca_em_combo
     )
 
     pickle.dump(dados_pra_salvar, memory_card)
@@ -51,7 +52,6 @@ def loadgame():
     memory_card = open('savegame.pkl', 'rb')
     dados_salvos = pickle.load(memory_card)
 
-    
     constantes.pretas = dados_salvos[1]
     constantes.brancas = dados_salvos[2]
     constantes.vazio = dados_salvos[3]
@@ -72,6 +72,10 @@ def loadgame():
     constantes.quant_jogadas_con_j2 = dados_salvos[18]
     constantes.quant_jogadas_j1 = dados_salvos[19]
     constantes.quant_jogadas_j2 = dados_salvos[20]
+    if len(dados_salvos) > 21:
+        constantes.peca_em_combo = dados_salvos[21]
+    else:
+        constantes.peca_em_combo = None
 
     memory_card.close()
     return True
@@ -84,7 +88,6 @@ def verifica_memory_card():
         bool: Retorna um booleano repesentado a existência
             de dados
     """
-    
     try:
         memory_card = open('savegame.pkl', 'rb')
         dados_salvos = pickle.load(memory_card)
